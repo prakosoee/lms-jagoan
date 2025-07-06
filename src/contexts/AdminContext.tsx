@@ -1,87 +1,29 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface Contributor {
-  id: string;
-  name: string;
-  role: string;
-  specialization: string;
-  experience: string;
-  image: string;
-  bio: string;
-  contributions: string;
-  email: string;
-  achievements: string[];
-  social: {
-    github: string;
-    linkedin: string;
-    twitter: string;
-    email: string;
-  };
-}
-
-interface Course {
-  id: string;
-  title: string;
-  category: string;
-  level: string;
-  duration: string;
-  students: number;
-  rating: number;
-  price: string;
-  image: string;
-  instructor: string;
-  description: string;
-  modules: CourseModule[];
-}
-
-interface CourseModule {
-  id: string;
-  title: string;
-  type: 'video' | 'podcast' | 'text';
-  content: string;
-  duration: string;
-}
-
-interface Roadmap {
-  id: string;
-  title: string;
-  icon: string;
-  color: string;
-  skills: string[];
-  duration: string;
-  projects: number;
-}
-
-interface Participant {
-  id: string;
-  fullName: string;
-  email: string;
-  username: string;
-  phone: string;
-  occupation: string;
-  organization: string;
-  referralSource: string;
-  registrationDate: string;
-  coursesEnrolled: string[];
-  progress: number;
-  certificatesEarned: number;
-}
+import { 
+  adminService, 
+  Contributor, 
+  Course, 
+  Roadmap, 
+  Participant 
+} from '../services/adminService';
 
 interface AdminContextType {
   contributors: Contributor[];
   courses: Course[];
   roadmaps: Roadmap[];
   participants: Participant[];
-  addContributor: (contributor: Omit<Contributor, 'id'>) => void;
-  updateContributor: (id: string, contributor: Partial<Contributor>) => void;
-  deleteContributor: (id: string) => void;
-  addCourse: (course: Omit<Course, 'id'>) => void;
-  updateCourse: (id: string, course: Partial<Course>) => void;
-  deleteCourse: (id: string) => void;
-  addRoadmap: (roadmap: Omit<Roadmap, 'id'>) => void;
-  updateRoadmap: (id: string, roadmap: Partial<Roadmap>) => void;
-  deleteRoadmap: (id: string) => void;
-  getParticipants: () => Participant[];
+  isLoading: boolean;
+  addContributor: (contributor: Omit<Contributor, 'id'>) => Promise<boolean>;
+  updateContributor: (id: string, contributor: Partial<Contributor>) => Promise<boolean>;
+  deleteContributor: (id: string) => Promise<boolean>;
+  addCourse: (course: Omit<Course, 'id'>) => Promise<boolean>;
+  updateCourse: (id: string, course: Partial<Course>) => Promise<boolean>;
+  deleteCourse: (id: string) => Promise<boolean>;
+  addRoadmap: (roadmap: Omit<Roadmap, 'id'>) => Promise<boolean>;
+  updateRoadmap: (id: string, roadmap: Partial<Roadmap>) => Promise<boolean>;
+  deleteRoadmap: (id: string) => Promise<boolean>;
+  getParticipants: () => Promise<void>;
+  refreshData: () => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -94,6 +36,7 @@ export const useAdmin = () => {
   return context;
 };
 
+// Initial data for fallback
 const initialContributors: Contributor[] = [
   {
     id: '1',
@@ -179,124 +122,196 @@ const initialRoadmaps: Roadmap[] = [
 ];
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [contributors, setContributors] = useState<Contributor[]>(initialContributors);
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>(initialRoadmaps);
+  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Load initial data
   useEffect(() => {
-    // Load data from localStorage
-    const storedContributors = localStorage.getItem('adminContributors');
-    const storedCourses = localStorage.getItem('adminCourses');
-    const storedRoadmaps = localStorage.getItem('adminRoadmaps');
-    
-    if (storedContributors) setContributors(JSON.parse(storedContributors));
-    if (storedCourses) setCourses(JSON.parse(storedCourses));
-    if (storedRoadmaps) setRoadmaps(JSON.parse(storedRoadmaps));
-    
-    // Load participants from users
-    loadParticipants();
+    refreshData();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('adminContributors', JSON.stringify(contributors));
-  }, [contributors]);
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      // Load contributors
+      const contributorsResponse = await adminService.getContributors();
+      if (contributorsResponse.success && contributorsResponse.data) {
+        setContributors(contributorsResponse.data.length > 0 ? contributorsResponse.data : initialContributors);
+      } else {
+        setContributors(initialContributors);
+      }
 
-  useEffect(() => {
-    localStorage.setItem('adminCourses', JSON.stringify(courses));
-  }, [courses]);
+      // Load courses
+      const coursesResponse = await adminService.getCourses();
+      if (coursesResponse.success && coursesResponse.data) {
+        setCourses(coursesResponse.data.length > 0 ? coursesResponse.data : initialCourses);
+      } else {
+        setCourses(initialCourses);
+      }
 
-  useEffect(() => {
-    localStorage.setItem('adminRoadmaps', JSON.stringify(roadmaps));
-  }, [roadmaps]);
+      // Load roadmaps
+      const roadmapsResponse = await adminService.getRoadmaps();
+      if (roadmapsResponse.success && roadmapsResponse.data) {
+        setRoadmaps(roadmapsResponse.data.length > 0 ? roadmapsResponse.data : initialRoadmaps);
+      } else {
+        setRoadmaps(initialRoadmaps);
+      }
 
-  const loadParticipants = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const learningProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
-    
-    const participantData: Participant[] = users.map((user: any) => {
-      const userProgress = learningProgress.find((p: any) => p.userId === user.id) || { courses: [] };
-      const coursesEnrolled = userProgress.courses || [];
-      const totalProgress = coursesEnrolled.reduce((acc: number, course: any) => acc + (course.progress || 0), 0);
-      const avgProgress = coursesEnrolled.length > 0 ? totalProgress / coursesEnrolled.length : 0;
-      const certificatesEarned = coursesEnrolled.filter((course: any) => course.certificateEarned).length;
-
-      return {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        username: user.username,
-        phone: user.phone || '',
-        occupation: user.occupation || '',
-        organization: user.organization || '',
-        referralSource: user.referralSource || '',
-        registrationDate: new Date(parseInt(user.id)).toLocaleDateString(),
-        coursesEnrolled: coursesEnrolled.map((c: any) => c.title || c.id),
-        progress: Math.round(avgProgress),
-        certificatesEarned
-      };
-    });
-
-    setParticipants(participantData);
+      // Load participants
+      await getParticipants();
+    } catch (error) {
+      console.error('Error loading admin data:', error);
+      // Set fallback data
+      setContributors(initialContributors);
+      setCourses(initialCourses);
+      setRoadmaps(initialRoadmaps);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const addContributor = (contributor: Omit<Contributor, 'id'>) => {
-    const newContributor = {
-      ...contributor,
-      id: Date.now().toString()
-    };
-    setContributors(prev => [...prev, newContributor]);
+  // Contributors management
+  const addContributor = async (contributor: Omit<Contributor, 'id'>): Promise<boolean> => {
+    try {
+      const response = await adminService.addContributor(contributor);
+      if (response.success && response.data) {
+        setContributors(prev => [...prev, response.data!]);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding contributor:', error);
+      return false;
+    }
   };
 
-  const updateContributor = (id: string, updatedContributor: Partial<Contributor>) => {
-    setContributors(prev => prev.map(contributor => 
-      contributor.id === id ? { ...contributor, ...updatedContributor } : contributor
-    ));
+  const updateContributor = async (id: string, contributor: Partial<Contributor>): Promise<boolean> => {
+    try {
+      const response = await adminService.updateContributor(id, contributor);
+      if (response.success) {
+        setContributors(prev => prev.map(c => c.id === id ? { ...c, ...contributor } : c));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating contributor:', error);
+      return false;
+    }
   };
 
-  const deleteContributor = (id: string) => {
-    setContributors(prev => prev.filter(contributor => contributor.id !== id));
+  const deleteContributor = async (id: string): Promise<boolean> => {
+    try {
+      const response = await adminService.deleteContributor(id);
+      if (response.success) {
+        setContributors(prev => prev.filter(c => c.id !== id));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting contributor:', error);
+      return false;
+    }
   };
 
-  const addCourse = (course: Omit<Course, 'id'>) => {
-    const newCourse = {
-      ...course,
-      id: Date.now().toString()
-    };
-    setCourses(prev => [...prev, newCourse]);
+  // Courses management
+  const addCourse = async (course: Omit<Course, 'id'>): Promise<boolean> => {
+    try {
+      const response = await adminService.addCourse(course);
+      if (response.success && response.data) {
+        setCourses(prev => [...prev, response.data!]);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding course:', error);
+      return false;
+    }
   };
 
-  const updateCourse = (id: string, updatedCourse: Partial<Course>) => {
-    setCourses(prev => prev.map(course => 
-      course.id === id ? { ...course, ...updatedCourse } : course
-    ));
+  const updateCourse = async (id: string, course: Partial<Course>): Promise<boolean> => {
+    try {
+      const response = await adminService.updateCourse(id, course);
+      if (response.success) {
+        setCourses(prev => prev.map(c => c.id === id ? { ...c, ...course } : c));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating course:', error);
+      return false;
+    }
   };
 
-  const deleteCourse = (id: string) => {
-    setCourses(prev => prev.filter(course => course.id !== id));
+  const deleteCourse = async (id: string): Promise<boolean> => {
+    try {
+      const response = await adminService.deleteCourse(id);
+      if (response.success) {
+        setCourses(prev => prev.filter(c => c.id !== id));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      return false;
+    }
   };
 
-  const addRoadmap = (roadmap: Omit<Roadmap, 'id'>) => {
-    const newRoadmap = {
-      ...roadmap,
-      id: Date.now().toString()
-    };
-    setRoadmaps(prev => [...prev, newRoadmap]);
+  // Roadmaps management
+  const addRoadmap = async (roadmap: Omit<Roadmap, 'id'>): Promise<boolean> => {
+    try {
+      const response = await adminService.addRoadmap(roadmap);
+      if (response.success && response.data) {
+        setRoadmaps(prev => [...prev, response.data!]);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding roadmap:', error);
+      return false;
+    }
   };
 
-  const updateRoadmap = (id: string, updatedRoadmap: Partial<Roadmap>) => {
-    setRoadmaps(prev => prev.map(roadmap => 
-      roadmap.id === id ? { ...roadmap, ...updatedRoadmap } : roadmap
-    ));
+  const updateRoadmap = async (id: string, roadmap: Partial<Roadmap>): Promise<boolean> => {
+    try {
+      const response = await adminService.updateRoadmap(id, roadmap);
+      if (response.success) {
+        setRoadmaps(prev => prev.map(r => r.id === id ? { ...r, ...roadmap } : r));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating roadmap:', error);
+      return false;
+    }
   };
 
-  const deleteRoadmap = (id: string) => {
-    setRoadmaps(prev => prev.filter(roadmap => roadmap.id !== id));
+  const deleteRoadmap = async (id: string): Promise<boolean> => {
+    try {
+      const response = await adminService.deleteRoadmap(id);
+      if (response.success) {
+        setRoadmaps(prev => prev.filter(r => r.id !== id));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting roadmap:', error);
+      return false;
+    }
   };
 
-  const getParticipants = () => {
-    loadParticipants();
-    return participants;
+  // Participants management
+  const getParticipants = async (): Promise<void> => {
+    try {
+      const response = await adminService.getParticipants();
+      if (response.success && response.data) {
+        setParticipants(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading participants:', error);
+    }
   };
 
   return (
@@ -305,6 +320,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       courses,
       roadmaps,
       participants,
+      isLoading,
       addContributor,
       updateContributor,
       deleteContributor,
@@ -314,7 +330,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addRoadmap,
       updateRoadmap,
       deleteRoadmap,
-      getParticipants
+      getParticipants,
+      refreshData
     }}>
       {children}
     </AdminContext.Provider>

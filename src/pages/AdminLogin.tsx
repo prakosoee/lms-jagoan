@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { adminService } from '../services/adminService';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -11,12 +12,6 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Demo admin credentials
-  const ADMIN_CREDENTIALS = {
-    email: 'admin@jagocoding.com',
-    password: 'admin123'
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -31,17 +26,21 @@ const AdminLogin = () => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (formData.email === ADMIN_CREDENTIALS.email && formData.password === ADMIN_CREDENTIALS.password) {
-      localStorage.setItem('adminAuth', 'true');
-      navigate('/admin/dashboard');
-    } else {
-      setError('Invalid admin credentials');
+    try {
+      // Use admin service for authentication
+      const response = await adminService.adminLogin(formData);
+      
+      if (response.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setError(response.error || 'Invalid admin credentials');
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.');
+      console.error('Admin login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
