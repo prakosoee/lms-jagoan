@@ -1,6 +1,6 @@
 // API Configuration and Base Service
 // TODO: Replace with actual API base URL when backend is ready
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // API Response Types
 export interface ApiResponse<T> {
