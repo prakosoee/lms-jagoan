@@ -14,12 +14,36 @@ import {
   Settings
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
+import ContributorForm from '../components/admin/ContributorForm';
+import CourseForm from '../components/admin/CourseForm';
+import RoadmapForm from '../components/admin/RoadmapForm';
 
 const AdminDashboard = () => {
-  const { contributors, courses, roadmaps, participants, getParticipants } = useAdmin();
+  const { 
+    contributors, 
+    courses, 
+    roadmaps, 
+    participants, 
+    getParticipants,
+    addContributor,
+    updateContributor,
+    deleteContributor,
+    addCourse,
+    updateCourse,
+    deleteCourse,
+    addRoadmap,
+    updateRoadmap,
+    deleteRoadmap
+  } = useAdmin();
+  
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');
+  
+  // Form states
+  const [contributorForm, setContributorForm] = useState({ isOpen: false, mode: 'add' as 'add' | 'edit', data: undefined as any });
+  const [courseForm, setCourseForm] = useState({ isOpen: false, mode: 'add' as 'add' | 'edit', data: undefined as any });
+  const [roadmapForm, setRoadmapForm] = useState({ isOpen: false, mode: 'add' as 'add' | 'edit', data: undefined as any });
 
   useEffect(() => {
     getParticipants();
@@ -74,6 +98,49 @@ const AdminDashboard = () => {
     
     return matchesSearch;
   });
+
+  // Form handlers
+  const handleAddContributor = () => {
+    setContributorForm({ isOpen: true, mode: 'add', data: undefined });
+  };
+
+  const handleEditContributor = (contributor: any) => {
+    setContributorForm({ isOpen: true, mode: 'edit', data: contributor });
+  };
+
+  const handleDeleteContributor = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this contributor?')) {
+      deleteContributor(id);
+    }
+  };
+
+  const handleAddCourse = () => {
+    setCourseForm({ isOpen: true, mode: 'add', data: undefined });
+  };
+
+  const handleEditCourse = (course: any) => {
+    setCourseForm({ isOpen: true, mode: 'edit', data: course });
+  };
+
+  const handleDeleteCourse = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      deleteCourse(id);
+    }
+  };
+
+  const handleAddRoadmap = () => {
+    setRoadmapForm({ isOpen: true, mode: 'add', data: undefined });
+  };
+
+  const handleEditRoadmap = (roadmap: any) => {
+    setRoadmapForm({ isOpen: true, mode: 'edit', data: roadmap });
+  };
+
+  const handleDeleteRoadmap = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this roadmap?')) {
+      deleteRoadmap(id);
+    }
+  };
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -241,7 +308,10 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Course Management</h2>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button 
+          onClick={handleAddCourse}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Course
         </button>
@@ -273,10 +343,16 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-blue-600">{course.price}</span>
                 <div className="flex space-x-2">
-                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                  <button 
+                    onClick={() => handleEditCourse(course)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                  >
                     <Edit className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded">
+                  <button 
+                    onClick={() => handleDeleteCourse(course.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -293,7 +369,10 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Contributor Management</h2>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button 
+          onClick={handleAddContributor}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Contributor
         </button>
@@ -316,10 +395,16 @@ const AdminDashboard = () => {
                 <p className="text-gray-500 text-sm">{contributor.experience}</p>
               </div>
               <div className="flex space-x-2">
-                <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                <button 
+                  onClick={() => handleEditContributor(contributor)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                >
                   <Edit className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded">
+                <button 
+                  onClick={() => handleDeleteContributor(contributor.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -353,7 +438,10 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Roadmap Management</h2>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button 
+          onClick={handleAddRoadmap}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Roadmap
         </button>
@@ -366,10 +454,16 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900">{roadmap.title}</h3>
               <div className="flex space-x-2">
-                <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                <button 
+                  onClick={() => handleEditRoadmap(roadmap)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                >
                   <Edit className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded">
+                <button 
+                  onClick={() => handleDeleteRoadmap(roadmap.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -451,6 +545,34 @@ const AdminDashboard = () => {
 
         {/* Content */}
         {renderContent()}
+
+        {/* Forms */}
+        <ContributorForm
+          isOpen={contributorForm.isOpen}
+          onClose={() => setContributorForm({ isOpen: false, mode: 'add', data: undefined })}
+          onSubmit={addContributor}
+          onUpdate={updateContributor}
+          contributor={contributorForm.data}
+          mode={contributorForm.mode}
+        />
+
+        <CourseForm
+          isOpen={courseForm.isOpen}
+          onClose={() => setCourseForm({ isOpen: false, mode: 'add', data: undefined })}
+          onSubmit={addCourse}
+          onUpdate={updateCourse}
+          course={courseForm.data}
+          mode={courseForm.mode}
+        />
+
+        <RoadmapForm
+          isOpen={roadmapForm.isOpen}
+          onClose={() => setRoadmapForm({ isOpen: false, mode: 'add', data: undefined })}
+          onSubmit={addRoadmap}
+          onUpdate={updateRoadmap}
+          roadmap={roadmapForm.data}
+          mode={roadmapForm.mode}
+        />
       </div>
     </div>
   );
