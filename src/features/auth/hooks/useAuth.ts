@@ -1,26 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService, User, LoginRequest, RegisterRequest } from '../services/authService';
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: RegisterRequest) => Promise<boolean>;
-  logout: () => void;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { useState, useEffect } from 'react';
+import { authApi, User, LoginRequest, RegisterRequest } from '../api/authApi';
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,9 +10,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user is already authenticated on app load
     const initializeAuth = async () => {
       try {
-        const tokenResponse = await authService.verifyToken();
+        const tokenResponse = await authApi.verifyToken();
         if (tokenResponse.success && tokenResponse.data) {
-          const userResponse = await authService.getCurrentUser();
+          const userResponse = await authApi.getCurrentUser();
           if (userResponse.success && userResponse.data) {
             setUser(userResponse.data);
             setIsAuthenticated(true);
@@ -51,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       const credentials: LoginRequest = { email, password };
-      const response = await authService.login(credentials);
+      const response = await authApi.login(credentials);
       
       if (response.success && response.data) {
         setUser(response.data.user);
@@ -72,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterRequest): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authService.register(userData);
+      const response = await authApi.register(userData);
       
       if (response.success && response.data) {
         setUser(response.data.user);
@@ -92,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await authService.logout();
+      await authApi.logout();
       setUser(null);
       setIsAuthenticated(false);
     } catch (error) {
@@ -103,16 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      register, 
-      logout, 
-      isAuthenticated, 
-      isLoading 
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return {
+    user,
+    login,
+    register,
+    logout,
+    isAuthenticated,
+    isLoading
+  };
 };

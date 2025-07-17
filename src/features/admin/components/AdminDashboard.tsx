@@ -13,10 +13,10 @@ import {
   Eye,
   Settings
 } from 'lucide-react';
-import { useAdmin } from '../contexts/AdminContext';
-import ContributorForm from '../components/admin/ContributorForm';
-import CourseForm from '../components/admin/CourseForm';
-import RoadmapForm from '../components/admin/RoadmapForm';
+import { useAdmin } from '../hooks/useAdmin';
+import ContributorForm from '../../../components/admin/ContributorForm';
+import CourseForm from '../../../components/admin/CourseForm';
+import RoadmapForm from '../../../components/admin/RoadmapForm';
 
 const AdminDashboard = () => {
   const { 

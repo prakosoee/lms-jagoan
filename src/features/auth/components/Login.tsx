@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { adminService } from '../services/adminService';
+import { Link, useNavigate } from 'react-router-dom';
+import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../../../store/AuthContext';
 
-const AdminLogin = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -11,6 +11,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,32 +28,29 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      // Use admin service for authentication
-      const response = await adminService.adminLogin(formData);
-      
-      if (response.success) {
-        navigate('/admin/dashboard');
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        navigate('/dashboard');
       } else {
-        setError(response.error || 'Invalid admin credentials');
+        setError('Email atau password salah');
       }
-    } catch (error) {
-      setError('Login failed. Please try again.');
-      console.error('Admin login error:', error);
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 flex items-center justify-center px-4">
+    <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-red-500 to-orange-600 rounded-full mb-4">
-              <Shield className="h-8 w-8 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4">
+              <LogIn className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Admin Access</h2>
-            <p className="text-gray-600">Sign in to access the admin dashboard</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-600">Masuk ke akun JagoCoding Anda</p>
           </div>
 
           {error && (
@@ -61,17 +59,10 @@ const AdminLogin = () => {
             </div>
           )}
 
-          {/* Demo Credentials Info */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm font-semibold mb-2">Demo Credentials:</p>
-            <p className="text-blue-700 text-sm">Email: admin@jagocoding.com</p>
-            <p className="text-blue-700 text-sm">Password: admin123</p>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Admin Email
+                Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -83,8 +74,8 @@ const AdminLogin = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                  placeholder="admin@jagocoding.com"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
@@ -104,8 +95,8 @@ const AdminLogin = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                  placeholder="Enter admin password"
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                  placeholder="Enter your password"
                   required
                 />
                 <button
@@ -125,15 +116,21 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-orange-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {isLoading ? 'Signing In...' : 'Access Dashboard'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-gray-600 text-sm">
-              This is a demo admin panel for content management
+            <p className="text-gray-600">
+              Belum punya akun?{' '}
+              <Link
+                to="/register"
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
+              >
+                Daftar sekarang
+              </Link>
             </p>
           </div>
         </div>
@@ -142,4 +139,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default Login;

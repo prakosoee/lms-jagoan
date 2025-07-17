@@ -1,40 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  adminService, 
-  Contributor, 
-  Course, 
-  Roadmap, 
-  Participant 
-} from '../services/adminService';
-
-interface AdminContextType {
-  contributors: Contributor[];
-  courses: Course[];
-  roadmaps: Roadmap[];
-  participants: Participant[];
-  isLoading: boolean;
-  addContributor: (contributor: Omit<Contributor, 'id'>) => Promise<boolean>;
-  updateContributor: (id: string, contributor: Partial<Contributor>) => Promise<boolean>;
-  deleteContributor: (id: string) => Promise<boolean>;
-  addCourse: (course: Omit<Course, 'id'>) => Promise<boolean>;
-  updateCourse: (id: string, course: Partial<Course>) => Promise<boolean>;
-  deleteCourse: (id: string) => Promise<boolean>;
-  addRoadmap: (roadmap: Omit<Roadmap, 'id'>) => Promise<boolean>;
-  updateRoadmap: (id: string, roadmap: Partial<Roadmap>) => Promise<boolean>;
-  deleteRoadmap: (id: string) => Promise<boolean>;
-  getParticipants: () => Promise<void>;
-  refreshData: () => Promise<void>;
-}
-
-const AdminContext = createContext<AdminContextType | undefined>(undefined);
-
-export const useAdmin = () => {
-  const context = useContext(AdminContext);
-  if (context === undefined) {
-    throw new Error('useAdmin must be used within an AdminProvider');
-  }
-  return context;
-};
+import { useState, useEffect } from 'react';
+import { adminApi, Contributor, Course, Roadmap, Participant } from '../api/adminApi';
 
 // Initial data for fallback
 const initialContributors: Contributor[] = [
@@ -121,7 +86,7 @@ const initialRoadmaps: Roadmap[] = [
   }
 ];
 
-export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useAdmin = () => {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
@@ -137,7 +102,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       // Load contributors
-      const contributorsResponse = await adminService.getContributors();
+      const contributorsResponse = await adminApi.getContributors();
       if (contributorsResponse.success && contributorsResponse.data) {
         setContributors(contributorsResponse.data.length > 0 ? contributorsResponse.data : initialContributors);
       } else {
@@ -145,7 +110,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       // Load courses
-      const coursesResponse = await adminService.getCourses();
+      const coursesResponse = await adminApi.getCourses();
       if (coursesResponse.success && coursesResponse.data) {
         setCourses(coursesResponse.data.length > 0 ? coursesResponse.data : initialCourses);
       } else {
@@ -153,7 +118,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       // Load roadmaps
-      const roadmapsResponse = await adminService.getRoadmaps();
+      const roadmapsResponse = await adminApi.getRoadmaps();
       if (roadmapsResponse.success && roadmapsResponse.data) {
         setRoadmaps(roadmapsResponse.data.length > 0 ? roadmapsResponse.data : initialRoadmaps);
       } else {
@@ -176,7 +141,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Contributors management
   const addContributor = async (contributor: Omit<Contributor, 'id'>): Promise<boolean> => {
     try {
-      const response = await adminService.addContributor(contributor);
+      const response = await adminApi.addContributor(contributor);
       if (response.success && response.data) {
         setContributors(prev => [...prev, response.data!]);
         return true;
@@ -190,7 +155,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateContributor = async (id: string, contributor: Partial<Contributor>): Promise<boolean> => {
     try {
-      const response = await adminService.updateContributor(id, contributor);
+      const response = await adminApi.updateContributor(id, contributor);
       if (response.success) {
         setContributors(prev => prev.map(c => c.id === id ? { ...c, ...contributor } : c));
         return true;
@@ -204,7 +169,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const deleteContributor = async (id: string): Promise<boolean> => {
     try {
-      const response = await adminService.deleteContributor(id);
+      const response = await adminApi.deleteContributor(id);
       if (response.success) {
         setContributors(prev => prev.filter(c => c.id !== id));
         return true;
@@ -219,7 +184,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Courses management
   const addCourse = async (course: Omit<Course, 'id'>): Promise<boolean> => {
     try {
-      const response = await adminService.addCourse(course);
+      const response = await adminApi.addCourse(course);
       if (response.success && response.data) {
         setCourses(prev => [...prev, response.data!]);
         return true;
@@ -233,7 +198,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateCourse = async (id: string, course: Partial<Course>): Promise<boolean> => {
     try {
-      const response = await adminService.updateCourse(id, course);
+      const response = await adminApi.updateCourse(id, course);
       if (response.success) {
         setCourses(prev => prev.map(c => c.id === id ? { ...c, ...course } : c));
         return true;
@@ -247,7 +212,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const deleteCourse = async (id: string): Promise<boolean> => {
     try {
-      const response = await adminService.deleteCourse(id);
+      const response = await adminApi.deleteCourse(id);
       if (response.success) {
         setCourses(prev => prev.filter(c => c.id !== id));
         return true;
@@ -262,7 +227,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Roadmaps management
   const addRoadmap = async (roadmap: Omit<Roadmap, 'id'>): Promise<boolean> => {
     try {
-      const response = await adminService.addRoadmap(roadmap);
+      const response = await adminApi.addRoadmap(roadmap);
       if (response.success && response.data) {
         setRoadmaps(prev => [...prev, response.data!]);
         return true;
@@ -276,7 +241,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateRoadmap = async (id: string, roadmap: Partial<Roadmap>): Promise<boolean> => {
     try {
-      const response = await adminService.updateRoadmap(id, roadmap);
+      const response = await adminApi.updateRoadmap(id, roadmap);
       if (response.success) {
         setRoadmaps(prev => prev.map(r => r.id === id ? { ...r, ...roadmap } : r));
         return true;
@@ -290,7 +255,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const deleteRoadmap = async (id: string): Promise<boolean> => {
     try {
-      const response = await adminService.deleteRoadmap(id);
+      const response = await adminApi.deleteRoadmap(id);
       if (response.success) {
         setRoadmaps(prev => prev.filter(r => r.id !== id));
         return true;
@@ -305,7 +270,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Participants management
   const getParticipants = async (): Promise<void> => {
     try {
-      const response = await adminService.getParticipants();
+      const response = await adminApi.getParticipants();
       if (response.success && response.data) {
         setParticipants(response.data);
       }
@@ -314,26 +279,22 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  return (
-    <AdminContext.Provider value={{
-      contributors,
-      courses,
-      roadmaps,
-      participants,
-      isLoading,
-      addContributor,
-      updateContributor,
-      deleteContributor,
-      addCourse,
-      updateCourse,
-      deleteCourse,
-      addRoadmap,
-      updateRoadmap,
-      deleteRoadmap,
-      getParticipants,
-      refreshData
-    }}>
-      {children}
-    </AdminContext.Provider>
-  );
+  return {
+    contributors,
+    courses,
+    roadmaps,
+    participants,
+    isLoading,
+    addContributor,
+    updateContributor,
+    deleteContributor,
+    addCourse,
+    updateCourse,
+    deleteCourse,
+    addRoadmap,
+    updateRoadmap,
+    deleteRoadmap,
+    getParticipants,
+    refreshData
+  };
 };

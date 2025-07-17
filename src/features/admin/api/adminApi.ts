@@ -1,4 +1,4 @@
-import { apiService, ApiResponse } from './api';
+import { apiService, ApiResponse } from '../../../services/api';
 
 // Admin Types
 export interface Contributor {
@@ -68,18 +68,11 @@ export interface Participant {
   certificatesEarned: number;
 }
 
-// Admin Service Class
-class AdminService {
+// Admin API Functions
+export const adminApi = {
   // Contributors Management
   async getContributors(): Promise<ApiResponse<Contributor[]>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<Contributor[]>('/admin/contributors', apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Get from localStorage
       const contributors = JSON.parse(localStorage.getItem('adminContributors') || '[]');
       return {
         success: true,
@@ -92,17 +85,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to get contributors'
       };
     }
-  }
+  },
 
   async addContributor(contributor: Omit<Contributor, 'id'>): Promise<ApiResponse<Contributor>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<Contributor>('/admin/contributors', contributor, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Save to localStorage
       const contributors = JSON.parse(localStorage.getItem('adminContributors') || '[]');
       const newContributor = {
         ...contributor,
@@ -122,17 +108,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to add contributor'
       };
     }
-  }
+  },
 
   async updateContributor(id: string, contributor: Partial<Contributor>): Promise<ApiResponse<Contributor>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.put<Contributor>(`/admin/contributors/${id}`, contributor, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Update in localStorage
       const contributors = JSON.parse(localStorage.getItem('adminContributors') || '[]');
       const index = contributors.findIndex((c: Contributor) => c.id === id);
       if (index !== -1) {
@@ -156,17 +135,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to update contributor'
       };
     }
-  }
+  },
 
   async deleteContributor(id: string): Promise<ApiResponse<void>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.delete<void>(`/admin/contributors/${id}`, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Delete from localStorage
       const contributors = JSON.parse(localStorage.getItem('adminContributors') || '[]');
       const filteredContributors = contributors.filter((c: Contributor) => c.id !== id);
       localStorage.setItem('adminContributors', JSON.stringify(filteredContributors));
@@ -181,18 +153,11 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to delete contributor'
       };
     }
-  }
+  },
 
   // Courses Management
   async getCourses(): Promise<ApiResponse<Course[]>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<Course[]>('/admin/courses', apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Get from localStorage
       const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
       return {
         success: true,
@@ -205,17 +170,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to get courses'
       };
     }
-  }
+  },
 
   async addCourse(course: Omit<Course, 'id'>): Promise<ApiResponse<Course>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<Course>('/admin/courses', course, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Save to localStorage
       const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
       const newCourse = {
         ...course,
@@ -235,17 +193,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to add course'
       };
     }
-  }
+  },
 
   async updateCourse(id: string, course: Partial<Course>): Promise<ApiResponse<Course>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.put<Course>(`/admin/courses/${id}`, course, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Update in localStorage
       const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
       const index = courses.findIndex((c: Course) => c.id === id);
       if (index !== -1) {
@@ -269,17 +220,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to update course'
       };
     }
-  }
+  },
 
   async deleteCourse(id: string): Promise<ApiResponse<void>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.delete<void>(`/admin/courses/${id}`, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Delete from localStorage
       const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
       const filteredCourses = courses.filter((c: Course) => c.id !== id);
       localStorage.setItem('adminCourses', JSON.stringify(filteredCourses));
@@ -294,18 +238,11 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to delete course'
       };
     }
-  }
+  },
 
   // Roadmaps Management
   async getRoadmaps(): Promise<ApiResponse<Roadmap[]>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<Roadmap[]>('/admin/roadmaps', apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Get from localStorage
       const roadmaps = JSON.parse(localStorage.getItem('adminRoadmaps') || '[]');
       return {
         success: true,
@@ -318,17 +255,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to get roadmaps'
       };
     }
-  }
+  },
 
   async addRoadmap(roadmap: Omit<Roadmap, 'id'>): Promise<ApiResponse<Roadmap>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<Roadmap>('/admin/roadmaps', roadmap, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Save to localStorage
       const roadmaps = JSON.parse(localStorage.getItem('adminRoadmaps') || '[]');
       const newRoadmap = {
         ...roadmap,
@@ -348,17 +278,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to add roadmap'
       };
     }
-  }
+  },
 
   async updateRoadmap(id: string, roadmap: Partial<Roadmap>): Promise<ApiResponse<Roadmap>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.put<Roadmap>(`/admin/roadmaps/${id}`, roadmap, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Update in localStorage
       const roadmaps = JSON.parse(localStorage.getItem('adminRoadmaps') || '[]');
       const index = roadmaps.findIndex((r: Roadmap) => r.id === id);
       if (index !== -1) {
@@ -382,17 +305,10 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to update roadmap'
       };
     }
-  }
+  },
 
   async deleteRoadmap(id: string): Promise<ApiResponse<void>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.delete<void>(`/admin/roadmaps/${id}`, apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Delete from localStorage
       const roadmaps = JSON.parse(localStorage.getItem('adminRoadmaps') || '[]');
       const filteredRoadmaps = roadmaps.filter((r: Roadmap) => r.id !== id);
       localStorage.setItem('adminRoadmaps', JSON.stringify(filteredRoadmaps));
@@ -407,18 +323,11 @@ class AdminService {
         error: error instanceof Error ? error.message : 'Failed to delete roadmap'
       };
     }
-  }
+  },
 
   // Participants Management
   async getParticipants(): Promise<ApiResponse<Participant[]>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<Participant[]>('/admin/participants', apiService.getAuthHeaders());
-      return response;
-      */
-
-      // TEMPORARY: Get from localStorage and process
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const learningProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
       
@@ -457,52 +366,4 @@ class AdminService {
       };
     }
   }
-
-  // Admin Authentication
-  async adminLogin(credentials: { email: string; password: string }): Promise<ApiResponse<{ token: string }>> {
-    try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<{ token: string }>('/admin/auth/login', credentials);
-      
-      if (response.success && response.data) {
-        localStorage.setItem('adminAuth', 'true');
-        apiService.setAuthToken(response.data.token);
-      }
-      
-      return response;
-      */
-
-      // TEMPORARY: Mock admin authentication
-      const ADMIN_CREDENTIALS = {
-        email: 'admin@jagocoding.com',
-        password: 'admin123'
-      };
-
-      if (credentials.email === ADMIN_CREDENTIALS.email && credentials.password === ADMIN_CREDENTIALS.password) {
-        const mockToken = `admin_token_${Date.now()}`;
-        localStorage.setItem('adminAuth', 'true');
-        apiService.setAuthToken(mockToken);
-        
-        return {
-          success: true,
-          data: { token: mockToken },
-          message: 'Admin login successful'
-        };
-      } else {
-        return {
-          success: false,
-          error: 'Invalid admin credentials'
-        };
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Admin login failed'
-      };
-    }
-  }
-}
-
-// Export admin service instance
-export const adminService = new AdminService();
+};

@@ -1,4 +1,4 @@
-import { apiService, ApiResponse } from './api';
+import { apiService, ApiResponse } from '../../../services/api';
 
 // Auth Types
 export interface User {
@@ -33,26 +33,11 @@ export interface LoginResponse {
   token: string;
 }
 
-// Auth Service Class
-class AuthService {
+// Auth API Functions
+export const authApi = {
   // Login user
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<LoginResponse>('/auth/login', credentials);
-      
-      if (response.success && response.data) {
-        // Store auth token
-        apiService.setAuthToken(response.data.token);
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
-      
-      return response;
-      */
-
       // TEMPORARY: Mock implementation using localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const foundUser = users.find((u: any) => 
@@ -87,26 +72,11 @@ class AuthService {
         error: error instanceof Error ? error.message : 'Login failed'
       };
     }
-  }
+  },
 
   // Register user
   async register(userData: RegisterRequest): Promise<ApiResponse<LoginResponse>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<LoginResponse>('/auth/register', userData);
-      
-      if (response.success && response.data) {
-        // Store auth token
-        apiService.setAuthToken(response.data.token);
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
-      
-      return response;
-      */
-
       // TEMPORARY: Mock implementation using localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const existingUser = users.find((u: any) => 
@@ -149,16 +119,11 @@ class AuthService {
         error: error instanceof Error ? error.message : 'Registration failed'
       };
     }
-  }
+  },
 
   // Logout user
   async logout(): Promise<ApiResponse<void>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.post<void>('/auth/logout', {}, apiService.getAuthHeaders());
-      */
-
       // Clear local storage
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
@@ -173,17 +138,11 @@ class AuthService {
         error: error instanceof Error ? error.message : 'Logout failed'
       };
     }
-  }
+  },
 
   // Get current user
   async getCurrentUser(): Promise<ApiResponse<User>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<User>('/auth/me', apiService.getAuthHeaders());
-      return response;
-      */
-
       // TEMPORARY: Get from localStorage
       const userData = localStorage.getItem('user');
       if (userData) {
@@ -204,17 +163,11 @@ class AuthService {
         error: error instanceof Error ? error.message : 'Failed to get user data'
       };
     }
-  }
+  },
 
   // Verify token
   async verifyToken(): Promise<ApiResponse<boolean>> {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await apiService.get<boolean>('/auth/verify', apiService.getAuthHeaders());
-      return response;
-      */
-
       // TEMPORARY: Check if token exists in localStorage
       const token = localStorage.getItem('authToken');
       return {
@@ -228,8 +181,38 @@ class AuthService {
         error: error instanceof Error ? error.message : 'Token verification failed'
       };
     }
-  }
-}
+  },
 
-// Export auth service instance
-export const authService = new AuthService();
+  // Admin login
+  async adminLogin(credentials: { email: string; password: string }): Promise<ApiResponse<{ token: string }>> {
+    try {
+      // TEMPORARY: Mock admin authentication
+      const ADMIN_CREDENTIALS = {
+        email: 'admin@jagocoding.com',
+        password: 'admin123'
+      };
+
+      if (credentials.email === ADMIN_CREDENTIALS.email && credentials.password === ADMIN_CREDENTIALS.password) {
+        const mockToken = `admin_token_${Date.now()}`;
+        localStorage.setItem('adminAuth', 'true');
+        apiService.setAuthToken(mockToken);
+        
+        return {
+          success: true,
+          data: { token: mockToken },
+          message: 'Admin login successful'
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Invalid admin credentials'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Admin login failed'
+      };
+    }
+  }
+};
