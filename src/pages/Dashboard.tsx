@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Clock, Award, Play, CheckCircle, BarChart3, Trophy } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useLearning } from '../contexts/LearningContext';
+import { useAuth } from '../store/AuthContext';
+import { useLearning } from '../store/LearningContext';
 
 const Dashboard = () => {
   const { user } = useAuth();

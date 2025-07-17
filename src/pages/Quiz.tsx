@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, X, ArrowLeft, ArrowRight, Trophy } from 'lucide-react';
-import { useLearning } from '../contexts/LearningContext';
+import { useLearning } from '../store/LearningContext';
 
 const Quiz = () => {
   const { courseId, moduleId } = useParams();

@@ -12,7 +12,7 @@ import {
   Pizza as QuizIcon,
   Award,
 } from "lucide-react";
-import { useLearning } from "../contexts/LearningContext";
+import { useLearning } from "../store/LearningContext";
 
 const Learning = () => {
   const { courseId, moduleId } = useParams();

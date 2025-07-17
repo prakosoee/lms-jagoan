@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Award, Download, Share2, ArrowLeft, Calendar, CheckCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useLearning } from '../contexts/LearningContext';
+import { useAuth } from '../store/AuthContext';
+import { useLearning } from '../store/LearningContext';
 
 const Certificate = () => {
   const { courseId } = useParams();
